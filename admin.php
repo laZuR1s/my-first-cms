@@ -90,28 +90,22 @@ function newArticle() {
     $results['formAction'] = "newArticle";
 
     if ( isset( $_POST['saveChanges'] ) ) {
-//            echo "<pre>";
-//            print_r($results);
-//            print_r($_POST);
-//            echo "<pre>";
-//            В $_POST данные о статье сохраняются корректно
-        // Пользователь получает форму редактирования статьи: сохраняем новую статью
+
         $article = new Article();
         $article->storeFormValues( $_POST );
-//            echo "<pre>";
-//            print_r($article);
-//            echo "<pre>";
-//            А здесь данные массива $article уже неполные(есть только Число от даты, категория и полный текст статьи)          
+
+        // ✅ Обработка чекбокса active
+        $article->active = isset($_POST['active']) ? 1 : 0;
+
         $article->insert();
         header( "Location: admin.php?status=changesSaved" );
 
     } elseif ( isset( $_POST['cancel'] ) ) {
 
-        // Пользователь сбросил результаты редактирования: возвращаемся к списку статей
         header( "Location: admin.php" );
+
     } else {
 
-        // Пользователь еще не получил форму редактирования: выводим форму
         $results['article'] = new Article;
         $data = Category::getList();
         $results['categories'] = $data['results'];
@@ -133,29 +127,30 @@ function editArticle() {
 
     if (isset($_POST['saveChanges'])) {
 
-        // Пользователь получил форму редактирования статьи: сохраняем изменения
         if ( !$article = Article::getById( (int)$_POST['articleId'] ) ) {
             header( "Location: admin.php?error=articleNotFound" );
             return;
         }
 
         $article->storeFormValues( $_POST );
+
+        // ✅ Обработка чекбокса active
+        $article->active = isset($_POST['active']) ? 1 : 0;
+
         $article->update();
         header( "Location: admin.php?status=changesSaved" );
 
     } elseif ( isset( $_POST['cancel'] ) ) {
 
-        // Пользователь отказался от результатов редактирования: возвращаемся к списку статей
         header( "Location: admin.php" );
+
     } else {
 
-        // Пользвоатель еще не получил форму редактирования: выводим форму
         $results['article'] = Article::getById((int)$_GET['articleId']);
         $data = Category::getList();
         $results['categories'] = $data['results'];
         require(TEMPLATE_PATH . "/admin/editArticle.php");
     }
-
 }
 
 
